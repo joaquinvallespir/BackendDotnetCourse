@@ -13,10 +13,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddKeyedScoped<ICommonService<BeerDto, BeerInsertDto, BeerUpdateDto>, BeerService>("beerService");
 builder.Services.AddKeyedScoped<ICommonService<SaleDto, SaleInsertDto, SaleUpdateDto>, SaleService>("saleService");
-
+builder.Services.AddKeyedScoped<ICommonService<BrandDto, BrandInsertDto, BrandUpdateDto>, BrandService>("brandService");
 
 //Repository
 builder.Services.AddScoped<IRepository<Beer>, BeerRepository>();
+builder.Services.AddScoped<IRepository<Brand>, BrandRepository>();
 builder.Services.AddScoped<IRepository<Sale>, SaleRepository>();
 
 //Automappers
@@ -32,11 +33,25 @@ builder.Services.AddScoped<IValidator<BeerInsertDto>, BeerInsertValidator>(); //
 builder.Services.AddScoped<IValidator<BeerUpdateDto>, BeerUpdateValidator>();
 builder.Services.AddScoped<IValidator<SaleInsertDto>, SaleInsertValidator>();
 builder.Services.AddScoped<IValidator<SaleUpdateDto>, SaleUpdateValidator>();
+builder.Services.AddScoped<IValidator<BrandInsertDto>, BrandInsertValidator>();
+builder.Services.AddScoped<IValidator<BrandUpdateDto>, BrandUpdateValidator>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//Autorización de Front End
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactApp", policyBuilder =>
+    {
+        policyBuilder.WithOrigins("http://localhost:5173");
+        policyBuilder.AllowAnyHeader();
+        policyBuilder.AllowAnyMethod();
+        policyBuilder.AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -52,5 +67,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors("ReactApp");
 
 app.Run();

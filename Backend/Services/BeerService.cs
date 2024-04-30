@@ -9,11 +9,13 @@ namespace Backend.Services
     public class BeerService : ICommonService<BeerDto, BeerInsertDto, BeerUpdateDto>
     {
         private IRepository<Beer> _beerRepository;
+        private IRepository<Brand> _brandRepository;
         private IMapper _mapper;
         public List<string> Errors { get; }
-        public BeerService(IRepository<Beer> beerRepository, IMapper mapper)
+        public BeerService(IRepository<Beer> beerRepository, IRepository<Brand> brandRepository, IMapper mapper)
         {
             _beerRepository = beerRepository;
+            _brandRepository = brandRepository;
             _mapper = mapper;
             Errors = new List<string>();
         }
@@ -45,7 +47,7 @@ namespace Backend.Services
         public async Task<BeerDto> Add(BeerInsertDto beerInsertDto)
         {
             var beer = _mapper.Map<Beer>(beerInsertDto);
-
+            beer.BrandName = await GetBrandName(beer.BeerId);
             await _beerRepository.Add(beer); 
             await _beerRepository.Save(); //el savechangesasync genera el id
 
@@ -61,6 +63,9 @@ namespace Backend.Services
                 beer = _mapper.Map<BeerUpdateDto, Beer>(beerUpdateDto, beer); //Al mandar los dos parámetros se edita el existente, no se crea uno nuevo
                 //Se manda el origen de la información para que ignore los campos que no estan en el automapper
                 //No se reasigna el BeerId
+                Console.WriteLine(beer.BrandName);
+                beer.BrandName = await GetBrandName(beer.BrandId);
+                Console.WriteLine(beer.BrandName);
                 _beerRepository.Update(beer);
                 await _beerRepository.Save();
 
@@ -106,6 +111,16 @@ namespace Backend.Services
                     ErrorMessage = "No puede existir una cerveza con un nombre ya existente"
                 };
             }
+            var existingBrand = _brandRepository.Search(b => b.BrandId == beerInsertDto.BrandId).FirstOrDefault();
+            if (existingBrand == null) 
+            {
+                return new Validators.ValidationResult
+                {
+                    IsValid = false,
+                    ErrorType = Validators.ValidationErrorType.NotFound,
+                    ErrorMessage = "La marca ingresada no existe"
+                };
+            }
             return new Validators.ValidationResult
             {
                 IsValid = true
@@ -121,6 +136,16 @@ namespace Backend.Services
                     IsValid = false,
                     ErrorType = Validators.ValidationErrorType.Duplicate,
                     ErrorMessage = "No puede existir una cerveza con un nombre ya existente"
+                };
+            }
+            var existingBrand = _brandRepository.Search(b => b.BrandId == beerUpdateDto.BrandId).FirstOrDefault();
+            if (existingBrand == null)
+            {
+                return new Validators.ValidationResult
+                {
+                    IsValid = false,
+                    ErrorType = Validators.ValidationErrorType.NotFound,
+                    ErrorMessage = "La marca ingresada no existe"
                 };
             }
             return new Validators.ValidationResult
@@ -141,6 +166,10 @@ namespace Backend.Services
             return null;
 
         }
-       
+        private async Task<string> GetBrandName(int brandId)
+        {
+            var brand = await _brandRepository.GetById(brandId);
+            return brand.Name;
+        }
     }
 }

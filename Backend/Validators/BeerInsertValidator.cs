@@ -12,6 +12,7 @@ namespace Backend.Validators
            RuleFor(x => x.BrandId).NotNull().WithMessage("La marca es obligatoria");
            RuleFor(x => x.BrandId).GreaterThan(0).WithMessage("Hubo un error con el valor enviado de {PropertyName}");
            RuleFor(x => x.Alcohol).GreaterThanOrEqualTo(0).WithMessage("El {PropertyName} no puede ser negativo");
+           RuleFor(x => x.Alcohol).LessThanOrEqualTo(100).WithMessage("El {PropertyName} no puede ser mayor a 100");
         }
     }
 }

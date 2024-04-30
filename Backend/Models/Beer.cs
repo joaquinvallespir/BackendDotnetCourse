@@ -15,6 +15,7 @@ namespace Backend.Models
         public decimal Price { get; set; }
        
         public int BrandId {  get; set; }
+        public string BrandName { get; set;}
         [Column(TypeName = "decimal(18,2)")]
         public decimal Alcohol {  get; set; }
         [ForeignKey("BrandId")]

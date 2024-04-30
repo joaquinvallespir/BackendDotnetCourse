@@ -15,6 +15,9 @@ namespace Backend.Automappers
             CreateMap<Sale, SaleDto>().ForMember(dto => dto.Id, m => m.MapFrom(s => s.SaleId));
             CreateMap<SaleInsertDto, Sale>();
             CreateMap<SaleUpdateDto, Sale>();
+            CreateMap<Brand, BrandDto>().ForMember(dto => dto.Id, m => m.MapFrom(s => s.BrandId));
+            CreateMap<BrandInsertDto, Brand>();
+            CreateMap<BrandUpdateDto, Brand>();
         }
 
     }

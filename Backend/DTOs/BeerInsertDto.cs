@@ -6,6 +6,7 @@ namespace Backend.DTOs
     {
         public string Name { get; set; }
         public int BrandId { get; set; }
+        public string BrandName { get; set; }
         public int StockQuantity { get; set; }
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
